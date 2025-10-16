@@ -1,16 +1,26 @@
 import pickle
 import joblib
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import os
-
-# Load the pre-trained model
-model = joblib.load("models/model.pkl")
 
 # Create FastAPI app
 app = FastAPI(title="Car Price Prediction API", version="1.0.0")
+templates = Jinja2Templates(directory="./templates")
+
+# Serve the HTML page with UTF-8 header
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request},
+        headers={"Content-Type": "text/html; charset=utf-8"}
+    )
+
+# Load the pre-trained model
+model = joblib.load("models/model.pkl")
 
 # Health check endpoint
 @app.get("/health")
