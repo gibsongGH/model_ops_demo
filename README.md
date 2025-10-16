@@ -8,5 +8,5 @@ This project is a collaborative initiative brought to you by **SuperDataScience*
 
 ## 📊 Dataset / Model
 
-A provided pre-trained ML model artifact that already includes preprocessing and the trained estimator on a small dataset of car prices. 
+A provided pre-trained ML model artifact that already includes preprocessing and the trained estimator on a small dataset of car prices (in Great British Pounds). 
 The focus is on serving, containerization, and deployment rather than model training.
