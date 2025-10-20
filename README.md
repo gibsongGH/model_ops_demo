@@ -3,7 +3,7 @@
 This project is a collaborative initiative brought to you by **SuperDataScience**, a global community dedicated to advancing the fields of **Data Science, Machine Learning, and AI**. 
 * Develop a **FastAPI backend** (with a minimal frontend)
 * **Containerize** your application with Docker
-* Set up a **basic Continuous Improvement / Continuous Develpment pipeline** using GitHub Actions
+* Set up a **basic Continuous Integration / Continuous Develpment pipeline** using GitHub Actions
 * **Deploy** the service to a cloud platform such as Hugging Face Spaces, Render, or AWS/GCP
 
 ## 📊 Dataset / Model
