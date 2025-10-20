@@ -23,11 +23,9 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy app code (only what you need)
 COPY app.py .
 COPY templates/ ./templates/
-# Put model at /models/model.pkl to match ENV below
-COPY models/model.pkl /models/model.pkl
 
-# Model path used by your app
-ENV MODEL_PATH=/models/model.pkl
+# Copy model
+COPY models/ ./models/
 
 # Create non-root user and give ownership
 RUN useradd --create-home --uid 1000 appuser \

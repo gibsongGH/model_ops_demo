@@ -1,6 +1,7 @@
 import pickle
 import joblib
 import pandas as pd
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -20,7 +21,9 @@ async def read_root(request: Request):
     )
 
 # Load the pre-trained model
-model = joblib.load("models/model.pkl")
+HERE = Path(__file__).resolve().parent
+MODEL_PATH = HERE / "models" / "model.pkl"
+model = joblib.load(MODEL_PATH)
 
 # Health check endpoint
 @app.get("/health")
