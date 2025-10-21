@@ -29,7 +29,7 @@ COPY models/ ./models/
 
 # Create non-root user and give ownership
 RUN useradd --create-home --uid 1000 appuser \
-    && chown -R appuser:appuser /app /models
+    && chown -R appuser:appuser /app
 USER appuser
 
 # Expose app port
