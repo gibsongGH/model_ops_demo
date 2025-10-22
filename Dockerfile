@@ -32,16 +32,18 @@ RUN useradd --create-home --uid 1000 appuser \
     && chown -R appuser:appuser /app
 USER appuser
 
-# Expose app port
-EXPOSE 8000
+# Expose ports commonly used by hosting platforms
+# - 7860 is commonly used by Hugging Face Spaces
+# - 8000 is commonly used by Render and local dev
+EXPOSE 7860 8000
 
-# Health check 
-HEALTHCHECK CMD python -c "import urllib.request,sys; \
-  sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health').status==200 else 1)"
+# Health check (uses PORT environment variable if provided)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD python -c "import os,urllib.request,sys; p=int(os.environ.get('PORT', 8000)); sys.exit(0 if urllib.request.urlopen(f'http://127.0.0.1:{p}/health').status==200 else 1)"
 
-# Start the server
-# If you're using FastAPI/Starlette (ASGI), keep uvicorn:
-CMD ["python", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the server using the PORT env var (default 8000).
+# Use shell form so ${PORT:-8000} is expanded.
+CMD ["sh", "-c", "python -m uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]
 
 # If you're using Flask/Werkzeug (WSGI), replace the line above with:
 # CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "app:app"]
