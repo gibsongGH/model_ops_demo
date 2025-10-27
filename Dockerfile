@@ -1,9 +1,12 @@
 # Use a slim Python base
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Good defaults
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
+
+# Default for Hugging Face (Render can override)
+ENV PORT=7860    
 
 # Workdir
 WORKDIR /app
@@ -20,16 +23,14 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir --prefer-binary -r requirements.txt
 
-# Copy app code (only what you need)
-COPY app.py .
-COPY templates/ ./templates/
+# Create non-root user first
+RUN useradd --create-home --uid 1000 appuser
 
-# Copy model
-COPY models/ ./models/
+# Now copy with proper ownership
+COPY --chown=appuser:appuser app.py .
+COPY --chown=appuser:appuser templates/ ./templates/
+COPY --chown=appuser:appuser models/ ./models/
 
-# Create non-root user and give ownership
-RUN useradd --create-home --uid 1000 appuser \
-    && chown -R appuser:appuser /app
 USER appuser
 
 # Expose ports commonly used by hosting platforms
@@ -37,13 +38,12 @@ USER appuser
 # - 8000 is commonly used by Render and local dev
 EXPOSE 7860 8000
 
-# Health check (uses PORT environment variable if provided)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD python -c "import os,urllib.request,sys; p=int(os.environ.get('PORT', 8000)); sys.exit(0 if urllib.request.urlopen(f'http://127.0.0.1:{p}/health').status==200 else 1)"
+# Health check (default to 7860)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=5 \
+  CMD python -c "import os,urllib.request,sys; p=int(os.environ.get('PORT', 7860)); sys.exit(0 if urllib.request.urlopen(f'http://127.0.0.1:{p}/health').status==200 else 1)"
 
-# Start the server using the PORT env var (default 8000).
-# Use shell form so ${PORT:-8000} is expanded.
-CMD ["sh", "-c", "python -m uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Start server; default to 7860
+CMD ["sh", "-c", "python -m uvicorn app:app --host 0.0.0.0 --port ${PORT:-7860}"]
 
 # If you're using Flask/Werkzeug (WSGI), replace the line above with:
 # CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "app:app"]
